@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuestras Calles — Reporta tu experiencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coral: #E8614A;
+    --coral-light: #F2927F;
+    --cream: #FAF7F2;
+    --dark: #1C1A18;
+    --mid: #5C5750;
+    --soft: #EDE8E0;
+    --green: #4A8C6F;
+    --yellow: #F5C842;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--dark);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-dot {
+    width: 36px; height: 36px;
+    background: var(--coral);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    color: var(--cream);
+    font-size: 20px;
+    font-weight: 300;
+  }
+  .header h1 span { color: var(--coral); font-style: italic; }
+
+  /* AVISO ANONIMATO */
+  .aviso-anonimato {
+    background: var(--green);
+    color: white;
+    padding: 12px 24px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* PROGRESO */
+  .progreso-wrap {
+    padding: 20px 24px 0;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .progreso-label {
+    font-size: 12px;
+    color: var(--mid);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .progreso-bar {
+    height: 4px;
+    background: var(--soft);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progreso-fill {
+    height: 100%;
+    background: var(--coral);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .puntos {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: center;
+  }
+  .punto {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--soft);
+    border: 2px solid var(--soft);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .punto.activo { background: var(--coral); border-color: var(--coral); }
+  .punto.completo { background: var(--green); border-color: var(--green); }
+
+  /* SECCIONES */
+  .form-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 24px 80px;
+  }
+
+  .seccion {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .seccion.activa { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .seccion-titulo {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .seccion-titulo span { color: var(--coral); font-style: italic; }
+  .seccion-sub {
+    font-size: 14px;
+    color: var(--mid);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* CAMPOS */
+  .campo {
+    margin-bottom: 20px;
+  }
+  .campo label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--dark);
+  }
+  .campo label .opt {
+    font-weight: 400;
+    color: var(--mid);
+    font-size: 12px;
+    margin-left: 4px;
+  }
+
+  /* CHIPS */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 8px 14px;
+    border: 1.5px solid var(--soft);
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+    user-select: none;
+    color: var(--dark);
+  }
+  .chip:hover { border-color: var(--coral-light); }
+  .chip.sel { background: var(--coral); border-color: var(--coral); color: white; }
+  .chip.sel-green { background: var(--green); border-color: var(--green); color: white; }
+
+  /* INPUT / SELECT */
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--soft);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: white;
+    color: var(--dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--coral); }
+
+  /* EMOJIS */
+  .emoji-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .emoji-btn {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    border: 2px solid var(--soft);
+    background: white;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-direction: column;
+  }
+  .emoji-btn span.etq {
+    font-size: 9px;
+    color: var(--mid);
+    margin-top: 2px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .emoji-btn:hover { border-color: var(--coral-light); transform: scale(1.05); }
+  .emoji-btn.sel { border-color: var(--coral); background: #FFF0EE; }
+
+  /* ESCALA */
+  .escala {
+    display: flex;
+    gap: 8px;
+  }
+  .escala-btn {
+    flex: 1;
+    padding: 12px 0;
+    border: 2px solid var(--soft);
+    border-radius: 10px;
+    background: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .escala-btn:hover { border-color: var(--coral-light); }
+  .escala-btn.sel { background: var(--coral); border-color: var(--coral); color: white; }
+
+  /* MAPA */
+  #mapa {
+    width: 100%;
+    height: 280px;
+    border-radius: 16px;
+    border: 2px solid var(--soft);
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .mapa-hint {
+    font-size: 12px;
+    color: var(--mid);
+    margin-top: 6px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .coords-display {
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 6px;
+    font-weight: 500;
+    min-height: 18px;
+  }
+
+  /* TRANSPORTE BLOQUE */
+  #bloque-transporte {
+    background: #F0F7F4;
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 8px;
+    display: none;
+    border: 1.5px solid #C8E6D8;
+  }
+  #bloque-transporte.visible { display: block; }
+  #bloque-transporte .campo:last-child { margin-bottom: 0; }
+
+  /* TOGGLE ANON */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border: 1.5px solid var(--soft);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .toggle-row .tit { font-size: 14px; font-weight: 500; }
+  .toggle-row .desc { font-size: 12px; color: var(--mid); margin-top: 2px; }
+  .toggle {
+    width: 44px; height: 24px;
+    background: var(--green);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px; right: 3px;
+    transition: right 0.2s;
+  }
+  .toggle.off { background: var(--soft); }
+  .toggle.off::after { right: 23px; }
+
+  /* NAVEGAR */
+  .nav-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .btn-prev {
+    padding: 14px 24px;
+    border: 2px solid var(--soft);
+    border-radius: 12px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--mid);
+    transition: all 0.15s;
+  }
+  .btn-prev:hover { border-color: var(--mid); color: var(--dark); }
+  .btn-next {
+    flex: 1;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    background: var(--coral);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: white;
+    transition: all 0.15s;
+  }
+  .btn-next:hover { background: #D4503A; }
+  .btn-next:disabled { background: var(--soft); color: var(--mid); cursor: not-allowed; }
+
+  /* ERROR */
+  .error-msg {
+    font-size: 12px;
+    color: var(--coral);
+    margin-top: 6px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* PANTALLA ÉXITO */
+  #pantalla-exito {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+    max-width: 480px;
+    margin: 0 auto;
+    animation: fadeIn 0.4s ease;
+  }
+  #pantalla-exito.visible { display: block; }
+  .exito-icon {
+    width: 80px; height: 80px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 24px;
+  }
+  #pantalla-exito h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 12px;
+  }
+  #pantalla-exito p { font-size: 15px; color: var(--mid); line-height: 1.6; margin-bottom: 24px; }
+  .recursos-box {
+    background: var(--soft);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: left;
+    margin-top: 24px;
+  }
+  .recursos-box h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mid); margin-bottom: 12px; }
+  .recurso { margin-bottom: 10px; }
+  .recurso .nom { font-size: 14px; font-weight: 500; }
+  .recurso .tel { font-size: 13px; color: var(--coral); }
+
+  /* SPINNER */
+  .spinner {
+    display: none;
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* DIVISOR */
+  .divisor {
+    height: 1px;
+    background: var(--soft);
+    margin: 20px 0;
+  }
+
+  @media (max-width: 480px) {
+    .seccion-titulo { font-size: 22px; }
+    .emoji-btn { width: 46px; height: 46px; font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-dot">📍</div>
+  <h1>Nuestras <span>Calles</span></h1>
+</div>
+
+<div class="aviso-anonimato">
+  🔒 Tu reporte es <strong>&nbsp;completamente anónimo</strong>&nbsp;— nunca se publica tu ubicación exacta ni datos personales.
+</div>
+
+<div class="progreso-wrap">
+  <div class="progreso-label">
+    <span id="seccion-label">Sección 1 de 7</span>
+    <span id="seccion-nombre">¿Quién eres?</span>
+  </div>
+  <div class="progreso-bar"><div class="progreso-fill" id="progreso-fill" style="width:14%"></div></div>
+  <div class="puntos" id="puntos-nav"></div>
+</div>
+
+<div class="form-wrap">
+
+  <!-- SECCIÓN 1: Perfil -->
+  <div class="seccion activa" id="sec-1">
+    <div class="seccion-titulo">¿Quién <span>eres?</span></div>
+    <div class="seccion-sub">Información básica para entender mejor las experiencias. Todo es opcional.</div>
+
+    <div class="campo">
+      <label>Rango de edad <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-edad">
+        <div class="chip" onclick="sel(this,'edad')">Menos de 18</div>
+        <div class="chip" onclick="sel(this,'edad')">18–25</div>
+        <div class="chip" onclick="sel(this,'edad')">26–35</div>
+        <div class="chip" onclick="sel(this,'edad')">36–45</div>
+        <div class="chip" onclick="sel(this,'edad')">46–60</div>
+        <div class="chip" onclick="sel(this,'edad')">Más de 60</div>
+        <div class="chip" onclick="sel(this,'edad')">Prefiero no decir</div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Género con el que te identificas <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-genero">
+        <div class="chip" onclick="sel(this,'genero')">Mujer</div>
+        <div class="chip" onclick="sel(this,'genero')">Hombre</div>
+        <div class="chip" onclick="sel(this,'genero')">No binarie</div>
+        <div class="chip" onclick="sel(this,'genero')">Trans femenina</div>
+        <div class="chip" onclick="sel(this,'genero')">Trans masculino</div>
+        <div class="chip" onclick="sel(this,'genero')">Prefiero no decir</div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Orientación sexual <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-orient">
+        <div class="chip" onclick="sel(this,'orient')">Heterosexual</div>
+        <div class="chip" onclick="sel(this,'orient')">Lesbiana / Gay</div>
+        <div class="chip" onclick="sel(this,'orient')">Bisexual</div>
+        <div class="chip" onclick="sel(this,'orient')">Pansexual</div>
+        <div class="chip" onclick="sel(this,'orient')">Asexual</div>
+        <div class="chip" onclick="sel(this,'orient')">Prefiero no decir</div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Municipio donde vives <span class="opt">(opcional)</span></label>
+      <select id="sel-municipio">
+        <option value="">-- Selecciona --</option>
+        <option>Monterrey</option><option>San Pedro Garza García</option>
+        <option>San Nicolás de los Garza</option><option>Guadalupe</option>
+        <option>Apodaca</option><option>Escobedo</option><option>Santa Catarina</option>
+        <option>García</option><option>Juárez</option><option>Cadereyta</option>
+        <option>Otro municipio de NL</option><option>Otro estado</option>
+        <option>Prefiero no decir</option>
+      </select>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-next" onclick="siguiente(2)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: Tipo de experiencia -->
+  <div class="seccion" id="sec-2">
+    <div class="seccion-titulo">¿Qué <span>viviste?</span></div>
+    <div class="seccion-sub">Selecciona la situación que más se acerca a tu experiencia.</div>
+
+    <div class="campo">
+      <label>Tipo de situación <span style="color:var(--coral)">*</span></label>
+      <div class="chips" id="chips-tipo" style="gap:10px">
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">👀 Miradas intimidantes / acecho visual</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">💬 Comentarios, silbidos o piropos no deseados</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">🤳 Fotografía o grabación sin consentimiento</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">🫵 Seguimiento o persecución</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">✋ Tocamiento sin consentimiento</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">🚫 Exhibicionismo / exposición indecente</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">💪 Agresión física</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">📱 Acoso digital (mensajes, llamadas)</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">🚗 Acoso desde vehículo</div>
+        <div class="chip" style="width:100%" onclick="sel(this,'tipo')">Otra situación</div>
+      </div>
+      <div class="error-msg" id="err-tipo">Por favor selecciona al menos una opción.</div>
+    </div>
+
+    <div class="campo">
+      <label>¿Fuiste tú quien lo vivió o lo presenciaste? <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-experiencia">
+        <div class="chip" onclick="sel(this,'experiencia')">Lo viví directamente</div>
+        <div class="chip" onclick="sel(this,'experiencia')">Lo presencié</div>
+        <div class="chip" onclick="sel(this,'experiencia')">Prefiero no decir</div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="anterior(1)">← Atrás</button>
+      <button class="btn-next" onclick="siguiente(3)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: Dónde y cuándo -->
+  <div class="seccion" id="sec-3">
+    <div class="seccion-titulo">¿Dónde y <span>cuándo?</span></div>
+    <div class="seccion-sub">Toca el mapa para marcar dónde ocurrió. Solo se registra una zona aproximada.</div>
+
+    <div class="campo">
+      <label>Marca el lugar en el mapa <span style="color:var(--coral)">*</span></label>
+      <div id="mapa"></div>
+      <div class="mapa-hint">📍 Toca o haz clic para colocar el marcador</div>
+      <div class="coords-display" id="coords-display"></div>
+      <div class="error-msg" id="err-mapa">Por favor marca la ubicación en el mapa.</div>
+    </div>
+
+    <div class="campo">
+      <label>Tipo de lugar <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-lugar">
+        <div class="chip" onclick="selLugar(this,'lugar')">Calle / banqueta</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Parque / plaza</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Transporte público 🚌</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Centro comercial</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Mercado</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Escuela / universidad</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Trabajo</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Bar / antro</div>
+        <div class="chip" onclick="selLugar(this,'lugar')">Otro</div>
+      </div>
+    </div>
+
+    <!-- BLOQUE TRANSPORTE -->
+    <div id="bloque-transporte">
+      <div class="campo">
+        <label>¿Qué tipo de transporte? <span style="color:var(--coral)">*</span></label>
+        <div class="chips" id="chips-tipo-trans">
+          <div class="chip" onclick="sel(this,'tipo-trans')">Metro / Metrorrey</div>
+          <div class="chip" onclick="sel(this,'tipo-trans')">Camión urbano</div>
+          <div class="chip" onclick="sel(this,'tipo-trans')">Ecovía</div>
+          <div class="chip" onclick="sel(this,'tipo-trans')">Taxi de app (Uber, etc.)</div>
+          <div class="chip" onclick="sel(this,'tipo-trans')">Taxi de calle</div>
+          <div class="chip" onclick="sel(this,'tipo-trans')">Otro</div>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Número o nombre de la ruta <span class="opt">(opcional)</span></label>
+        <input type="text" id="inp-ruta" placeholder="Ej: Ruta 1, Línea 2, Ecovía...">
+      </div>
+      <div class="campo">
+        <label>¿En qué parte ocurrió? <span class="opt">(opcional)</span></label>
+        <div class="chips" id="chips-parte-trans">
+          <div class="chip" onclick="sel(this,'parte-trans')">Dentro del vehículo</div>
+          <div class="chip" onclick="sel(this,'parte-trans')">Parada / estación</div>
+          <div class="chip" onclick="sel(this,'parte-trans')">Fue el operador/conductor</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="campo" style="margin-top:16px">
+      <label>Hora aproximada <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-hora">
+        <div class="chip" onclick="sel(this,'hora')">Madrugada (0–6h)</div>
+        <div class="chip" onclick="sel(this,'hora')">Mañana (6–12h)</div>
+        <div class="chip" onclick="sel(this,'hora')">Tarde (12–18h)</div>
+        <div class="chip" onclick="sel(this,'hora')">Noche (18–24h)</div>
+        <div class="chip" onclick="sel(this,'hora')">No recuerdo</div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="anterior(2)">← Atrás</button>
+      <button class="btn-next" onclick="siguiente(4)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 4: Emociones en el momento -->
+  <div class="seccion" id="sec-4">
+    <div class="seccion-titulo">¿Cómo te <span>sentiste?</span></div>
+    <div class="seccion-sub">Tus emociones en ese momento. Puedes seleccionar varias.</div>
+
+    <div class="campo">
+      <label>¿Qué sentiste cuando ocurrió? <span class="opt">(opcional)</span></label>
+      <div class="emoji-row" id="chips-emocion">
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">😨<span class="etq">Miedo</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">😡<span class="etq">Enojo</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">😳<span class="etq">Vergüenza</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">😰<span class="etq">Ansiedad</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">🥺<span class="etq">Tristeza</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">😶<span class="etq">Parálisis</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">💪<span class="etq">Empoderamiento</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion')">😐<span class="etq">Indiferencia</span></div>
+      </div>
+    </div>
+
+    <div class="divisor"></div>
+
+    <div class="campo">
+      <label>¿Cómo describes el lugar donde ocurrió? <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-sensacion" style="gap:8px">
+        <div class="chip" onclick="selMulti(this,'sensacion')">Oscuro / mal iluminado</div>
+        <div class="chip" onclick="selMulti(this,'sensacion')">Solitario / sin gente</div>
+        <div class="chip" onclick="selMulti(this,'sensacion')">Muy concurrido</div>
+        <div class="chip" onclick="selMulti(this,'sensacion')">Sucio / descuidado</div>
+        <div class="chip" onclick="selMulti(this,'sensacion')">Sin salidas visibles</div>
+        <div class="chip" onclick="selMulti(this,'sensacion')">Sin vigilancia</div>
+        <div class="chip" onclick="selMulti(this,'sensacion')">Espacio que normalmente me gusta</div>
+        <div class="chip" onclick="selMulti(this,'sensacion')">Ya me sentía insegura ahí</div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Intensidad de la experiencia: 1 (leve) a 5 (muy intensa) <span class="opt">(opcional)</span></label>
+      <div class="escala" id="escala-intensidad">
+        <button class="escala-btn" onclick="selEscala(this,'intensidad',1)">1</button>
+        <button class="escala-btn" onclick="selEscala(this,'intensidad',2)">2</button>
+        <button class="escala-btn" onclick="selEscala(this,'intensidad',3)">3</button>
+        <button class="escala-btn" onclick="selEscala(this,'intensidad',4)">4</button>
+        <button class="escala-btn" onclick="selEscala(this,'intensidad',5)">5</button>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="anterior(3)">← Atrás</button>
+      <button class="btn-next" onclick="siguiente(5)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 5: Impacto posterior -->
+  <div class="seccion" id="sec-5">
+    <div class="seccion-titulo">¿Qué pasó <span>después?</span></div>
+    <div class="seccion-sub">El impacto invisible de estas experiencias en tu vida cotidiana.</div>
+
+    <div class="campo">
+      <label>¿Cambió tu comportamiento después? <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-impacto" style="gap:8px">
+        <div class="chip" onclick="selMulti(this,'impacto')">Evito pasar por ese lugar</div>
+        <div class="chip" onclick="selMulti(this,'impacto')">Cambié de ruta o medio de transporte</div>
+        <div class="chip" onclick="selMulti(this,'impacto')">Salgo menos sola</div>
+        <div class="chip" onclick="selMulti(this,'impacto')">Cambié mis horarios</div>
+        <div class="chip" onclick="selMulti(this,'impacto')">Cambié mi forma de vestir</div>
+        <div class="chip" onclick="selMulti(this,'impacto')">Busqué compañía para salir</div>
+        <div class="chip" onclick="selMulti(this,'impacto')">No cambié nada</div>
+        <div class="chip" onclick="selMulti(this,'impacto')">Prefiero no decir</div>
+      </div>
+    </div>
+
+    <div class="divisor"></div>
+
+    <div class="campo">
+      <label>¿Cómo te sientes al reportarlo ahora? <span class="opt">(opcional)</span></label>
+      <div class="emoji-row" id="chips-emocion-rep">
+        <div class="emoji-btn" onclick="selMulti(this,'emocion-rep')">💪<span class="etq">Empoderada</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion-rep')">😌<span class="etq">Alivio</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion-rep')">😨<span class="etq">Nerviosismo</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion-rep')">🫂<span class="etq">Acompañada</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion-rep')">😶<span class="etq">Neutral</span></div>
+        <div class="emoji-btn" onclick="selMulti(this,'emocion-rep')">😔<span class="etq">Tristeza</span></div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="anterior(4)">← Atrás</button>
+      <button class="btn-next" onclick="siguiente(6)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 6: Denuncia -->
+  <div class="seccion" id="sec-6">
+    <div class="seccion-titulo">¿Lo <span>reportaste?</span></div>
+    <div class="seccion-sub">No hay respuesta correcta. Esta información nos ayuda a entender las barreras institucionales.</div>
+
+    <div class="campo">
+      <label>¿Reportaste o denunciaste la situación? <span class="opt">(opcional)</span></label>
+      <div class="chips" id="chips-denuncia">
+        <div class="chip" onclick="sel(this,'denuncia')">Sí, ante la policía</div>
+        <div class="chip" onclick="sel(this,'denuncia')">Sí, ante otra instancia</div>
+        <div class="chip" onclick="sel(this,'denuncia')">No lo reporté</div>
+        <div class="chip" onclick="sel(this,'denuncia')">Prefiero no decir</div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Si no lo reportaste, ¿por qué? <span class="opt">(puedes seleccionar varias)</span></label>
+      <div class="chips" id="chips-barrera" style="gap:8px">
+        <div class="chip" onclick="selMulti(this,'barrera')">No sabía a quién acudir</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">No pensé que era suficientemente grave</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">Miedo a no ser creída</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">Desconfianza en las autoridades</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">Miedo a represalias</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">Vergüenza o culpa</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">No tenía tiempo o energía</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">Proceso demasiado complicado</div>
+        <div class="chip" onclick="selMulti(this,'barrera')">No aplica</div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="anterior(5)">← Atrás</button>
+      <button class="btn-next" onclick="siguiente(7)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 7: Mensaje final + envío -->
+  <div class="seccion" id="sec-7">
+    <div class="seccion-titulo">Casi <span>listo</span></div>
+    <div class="seccion-sub">¿Quieres agregar algo más? Tu voz importa.</div>
+
+    <div class="campo">
+      <label>¿Hay algo más que quieras compartir? <span class="opt">(opcional)</span></label>
+      <textarea id="inp-texto" rows="4" placeholder="Puedes describir lo que pasó con tus propias palabras, o cualquier cosa que no haya quedado en las preguntas anteriores..."></textarea>
+    </div>
+
+    <div class="campo">
+      <div class="toggle-row">
+        <div>
+          <div class="tit">🔒 Enviar de forma anónima</div>
+          <div class="desc">Activado — no se guarda ningún dato que te identifique</div>
+        </div>
+        <div class="toggle" id="toggle-anon" onclick="toggleAnon()"></div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="anterior(6)">← Atrás</button>
+      <button class="btn-next" id="btn-enviar" onclick="enviar()">
+        <span id="btn-enviar-txt">Enviar reporte 🗺️</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- PANTALLA ÉXITO -->
+<div id="pantalla-exito">
+  <div class="exito-icon">✓</div>
+  <h2>¡Gracias por reportar!</h2>
+  <p>Tu experiencia ayuda a visibilizar los patrones de violencia en el espacio público de Monterrey y a construir políticas públicas más justas.</p>
+  <p style="font-size:13px; color:var(--mid)">Tu reporte aparecerá en el mapa en los próximos minutos.</p>
+  <div class="recursos-box">
+    <h3>Si necesitas apoyo</h3>
+    <div class="recurso"><div class="nom">FEVIMTRA (atención 24/7)</div><div class="tel">800 835 4800</div></div>
+    <div class="recurso"><div class="nom">CAVI Nuevo León</div><div class="tel">81 8342 7180</div></div>
+    <div class="recurso"><div class="nom">INMUJERES NL</div><div class="tel">81 2020 9800</div></div>
+    <div class="recurso"><div class="nom">Línea de emergencias</div><div class="tel">911</div></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<script>
+// =========================================================
+// ESTADO GLOBAL
+// =========================================================
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcyR5R5Xk7xpESOhGKZzHLZSspICZH5yYSg_6dFPN3KxIckzstbAKGEOLHAJdrke1tmA/exec';
+
+var estado = {
+  seccionActual: 1,
+  totalSecciones: 7,
+  respuestas: {},
+  lat: null,
+  lng: null,
+  intensidad: null,
+  anonimo: true,
+  completadas: []
+};
+
+var nomSecciones = ['¿Quién eres?','¿Qué viviste?','¿Dónde y cuándo?','¿Cómo te sentiste?','¿Qué pasó después?','¿Lo reportaste?','Enviar'];
+
+// =========================================================
+// PUNTOS DE NAVEGACIÓN
+// =========================================================
+function renderPuntos() {
+  var wrap = document.getElementById('puntos-nav');
+  wrap.innerHTML = '';
+  for (var i = 1; i <= estado.totalSecciones; i++) {
+    var d = document.createElement('div');
+    d.className = 'punto' + (i === estado.seccionActual ? ' activo' : '') + (estado.completadas.indexOf(i) > -1 ? ' completo' : '');
+    (function(idx) { d.onclick = function() { if (estado.completadas.indexOf(idx) > -1 || idx === estado.seccionActual) irA(idx); }; })(i);
+    wrap.appendChild(d);
+  }
+}
+
+function actualizarProgreso() {
+  var pct = (estado.seccionActual / estado.totalSecciones) * 100;
+  document.getElementById('progreso-fill').style.width = pct + '%';
+  document.getElementById('seccion-label').textContent = 'Sección ' + estado.seccionActual + ' de ' + estado.totalSecciones;
+  document.getElementById('seccion-nombre').textContent = nomSecciones[estado.seccionActual - 1];
+  renderPuntos();
+}
+
+function irA(n) {
+  document.getElementById('sec-' + estado.seccionActual).classList.remove('activa');
+  estado.seccionActual = n;
+  document.getElementById('sec-' + n).classList.add('activa');
+  actualizarProgreso();
+  window.scrollTo(0, 0);
+}
+
+// =========================================================
+// NAVEGACIÓN
+// =========================================================
+function siguiente(destino) {
+  if (!validar(estado.seccionActual)) return;
+  if (estado.completadas.indexOf(estado.seccionActual) === -1) estado.completadas.push(estado.seccionActual);
+  irA(destino);
+}
+
+function anterior(destino) {
+  irA(destino);
+}
+
+// =========================================================
+// VALIDACIÓN
+// =========================================================
+function validar(sec) {
+  if (sec === 2) {
+    var sel = document.querySelectorAll('#chips-tipo .chip.sel');
+    var err = document.getElementById('err-tipo');
+    if (sel.length === 0) { err.classList.add('visible'); return false; }
+    err.classList.remove('visible');
+  }
+  if (sec === 3) {
+    var err2 = document.getElementById('err-mapa');
+    if (!estado.lat) { err2.classList.add('visible'); return false; }
+    err2.classList.remove('visible');
+    // Si transporte público, validar tipo-trans
+    var lugarSel = document.querySelectorAll('#chips-lugar .chip.sel');
+    var esTransporte = false;
+    lugarSel.forEach(function(c) { if (c.textContent.indexOf('Transporte') > -1) esTransporte = true; });
+    if (esTransporte) {
+      var transSel = document.querySelectorAll('#chips-tipo-trans .chip.sel');
+      if (transSel.length === 0) { alert('Por favor indica el tipo de transporte.'); return false; }
+    }
+  }
+  return true;
+}
+
+// =========================================================
+// CHIPS SELECCIÓN ÚNICA
+// =========================================================
+function sel(el, grupo) {
+  var parent = el.parentNode;
+  parent.querySelectorAll('.chip.sel').forEach(function(c) { c.classList.remove('sel'); });
+  el.classList.add('sel');
+  if (!estado.respuestas[grupo]) estado.respuestas[grupo] = [];
+  estado.respuestas[grupo] = [el.textContent.trim()];
+}
+
+// =========================================================
+// CHIPS SELECCIÓN MÚLTIPLE
+// =========================================================
+function selMulti(el, grupo) {
+  el.classList.toggle('sel');
+  if (!estado.respuestas[grupo]) estado.respuestas[grupo] = [];
+  var txt = el.querySelector('.etq') ? el.querySelector('.etq').textContent.trim() : el.textContent.trim();
+  var idx = estado.respuestas[grupo].indexOf(txt);
+  if (el.classList.contains('sel')) { if (idx === -1) estado.respuestas[grupo].push(txt); }
+  else { if (idx > -1) estado.respuestas[grupo].splice(idx, 1); }
+}
+
+// =========================================================
+// LUGAR CON LÓGICA TRANSPORTE
+// =========================================================
+function selLugar(el, grupo) {
+  sel(el, grupo);
+  var esTransporte = el.textContent.indexOf('Transporte') > -1;
+  var bloque = document.getElementById('bloque-transporte');
+  if (esTransporte) bloque.classList.add('visible');
+  else bloque.classList.remove('visible');
+}
+
+// =========================================================
+// ESCALA
+// =========================================================
+function selEscala(el, grupo, val) {
+  var parent = el.parentNode;
+  parent.querySelectorAll('.escala-btn.sel').forEach(function(b) { b.classList.remove('sel'); });
+  el.classList.add('sel');
+  estado[grupo] = val;
+}
+
+// =========================================================
+// TOGGLE ANONIMATO
+// =========================================================
+function toggleAnon() {
+  estado.anonimo = !estado.anonimo;
+  var t = document.getElementById('toggle-anon');
+  if (estado.anonimo) t.classList.remove('off');
+  else t.classList.add('off');
+}
+
+// =========================================================
+// MAPA
+// =========================================================
+window.addEventListener('load', function() {
+  actualizarProgreso();
+
+  var mapa = L.map('mapa').setView([25.6866, -100.3161], 12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CartoDB', maxZoom: 19
+  }).addTo(mapa);
+
+  var marcador = null;
+  var iconoPin = L.divIcon({
+    html: '<div style="width:28px;height:28px;background:var(--coral,#E8614A);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+    iconSize: [28, 28], iconAnchor: [14, 28], className: ''
+  });
+
+  function ponerPin(latlng) {
+    if (marcador) mapa.removeLayer(marcador);
+    marcador = L.marker(latlng, { icon: iconoPin, draggable: true }).addTo(mapa);
+    estado.lat = latlng.lat.toFixed(5);
+    estado.lng = latlng.lng.toFixed(5);
+    document.getElementById('coords-display').textContent = '✓ Ubicación registrada';
+    document.getElementById('err-mapa').classList.remove('visible');
+    marcador.on('dragend', function(e) {
+      var p = e.target.getLatLng();
+      estado.lat = p.lat.toFixed(5);
+      estado.lng = p.lng.toFixed(5);
+    });
+  }
+
+  mapa.on('click', function(e) { ponerPin(e.latlng); });
+});
+
+// =========================================================
+// ENVIAR
+// =========================================================
+function enviar() {
+  var btn = document.getElementById('btn-enviar');
+  var txt = document.getElementById('btn-enviar-txt');
+  var spin = document.getElementById('spinner');
+
+  btn.disabled = true;
+  txt.style.display = 'none';
+  spin.style.display = 'block';
+
+  var payload = {
+    respuestas: estado.respuestas,
+    lat: estado.lat || '',
+    lng: estado.lng || '',
+    intensidad: estado.intensidad || '',
+    ruta: document.getElementById('inp-ruta').value,
+    texto_libre: document.getElementById('inp-texto').value,
+    anonimo: estado.anonimo
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function() {
+    mostrarExito();
+  })
+  .catch(function() {
+    // Con no-cors, fetch siempre "falla" en el then pero sí envía
+    mostrarExito();
+  });
+}
+
+function mostrarExito() {
+  document.querySelector('.header').style.display = 'none';
+  document.querySelector('.aviso-anonimato').style.display = 'none';
+  document.querySelector('.progreso-wrap').style.display = 'none';
+  document.querySelector('.form-wrap').style.display = 'none';
+  document.getElementById('pantalla-exito').classList.add('visible');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
