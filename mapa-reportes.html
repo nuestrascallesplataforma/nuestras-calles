@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuestras Calles — Mapa de Reportes</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root {
+    --coral: #E8614A;
+    --coral-light: #F2927F;
+    --cream: #FAF7F2;
+    --dark: #1C1A18;
+    --mid: #5C5750;
+    --soft: #EDE8E0;
+    --green: #4A8C6F;
+    --yellow: #F5C842;
+    --purple: #7C5CBF;
+    --blue: #3B7DD8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--dark); height: 100vh; display: flex; flex-direction: column; }
+
+  /* HEADER */
+  .header {
+    background: var(--dark);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 32px; height: 32px; background: var(--coral); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .header h1 { font-family: 'Fraunces', serif; color: var(--cream); font-size: 18px; font-weight: 300; }
+  .header h1 span { color: var(--coral); font-style: italic; }
+  .btn-reporte {
+    padding: 8px 16px;
+    background: var(--coral);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-reporte:hover { background: #D4503A; }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: white;
+    border-bottom: 1px solid var(--soft);
+    padding: 10px 20px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .stat { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .stat-num { font-size: 18px; font-weight: 600; color: var(--coral); font-family: 'Fraunces', serif; }
+  .stat-label { font-size: 12px; color: var(--mid); }
+  .stat-div { width: 1px; height: 24px; background: var(--soft); flex-shrink: 0; }
+
+  /* FILTROS */
+  .filtros-bar {
+    background: var(--cream);
+    border-bottom: 1px solid var(--soft);
+    padding: 10px 20px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .filtros-label { font-size: 12px; color: var(--mid); font-weight: 500; white-space: nowrap; }
+  .filtro-chip {
+    padding: 5px 12px;
+    border: 1.5px solid var(--soft);
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    background: white;
+    color: var(--dark);
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .filtro-chip:hover { border-color: var(--coral-light); }
+  .filtro-chip.activo { background: var(--coral); border-color: var(--coral); color: white; }
+
+  /* MAPA */
+  .mapa-wrap { flex: 1; position: relative; }
+  #mapa { width: 100%; height: 100%; }
+
+  /* LOADING */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(250,247,242,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    gap: 12px;
+  }
+  .loading-overlay.oculto { display: none; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--soft); border-top-color: var(--coral); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-txt { font-size: 14px; color: var(--mid); }
+
+  /* POPUP CUSTOM */
+  .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important; border: none !important; padding: 0 !important; overflow: hidden; }
+  .leaflet-popup-content { margin: 0 !important; width: 220px !important; }
+  .popup-inner { padding: 14px 16px; }
+  .popup-tipo { font-size: 13px; font-weight: 500; color: var(--dark); margin-bottom: 4px; }
+  .popup-meta { font-size: 11px; color: var(--mid); margin-bottom: 8px; line-height: 1.5; }
+  .popup-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; margin-right: 4px; margin-bottom: 4px; }
+  .popup-emocion { background: #FFF0EE; color: var(--coral); }
+  .popup-lugar { background: #EDF5F1; color: var(--green); }
+  .popup-hora { background: #F0EDFB; color: var(--purple); }
+  .leaflet-popup-tip { display: none; }
+
+  /* LEYENDA */
+  .leyenda {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    z-index: 500;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    font-size: 12px;
+  }
+  .leyenda-titulo { font-weight: 500; margin-bottom: 8px; color: var(--dark); }
+  .leyenda-item { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; color: var(--mid); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SIN DATOS */
+  .sin-datos {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 16px;
+    padding: 24px 32px;
+    text-align: center;
+    z-index: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: none;
+  }
+  .sin-datos.visible { display: block; }
+  .sin-datos p { font-size: 14px; color: var(--mid); margin-top: 8px; }
+
+  @media (max-width: 600px) {
+    .leyenda { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-dot">📍</div>
+    <h1>Nuestras <span>Calles</span> — Mapa</h1>
+  </div>
+  <a class="btn-reporte" href="nuestras-calles-formulario.html">+ Reportar</a>
+</div>
+
+<div class="stats-bar" id="stats-bar">
+  <div class="stat">
+    <div class="stat-num" id="total-reportes">—</div>
+    <div class="stat-label">reportes</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat">
+    <div class="stat-num" id="total-hoy">—</div>
+    <div class="stat-label">hoy</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat">
+    <div class="stat-num" id="tipo-frecuente">—</div>
+    <div class="stat-label">más frecuente</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat">
+    <div class="stat-num" id="hora-frecuente">—</div>
+    <div class="stat-label">hora más reportada</div>
+  </div>
+</div>
+
+<div class="filtros-bar">
+  <span class="filtros-label">Filtrar:</span>
+  <div class="filtro-chip activo" onclick="filtrar(this,'todos')">Todos</div>
+  <div class="filtro-chip" onclick="filtrar(this,'acoso')">👀 Acoso visual</div>
+  <div class="filtro-chip" onclick="filtrar(this,'comentarios')">💬 Comentarios</div>
+  <div class="filtro-chip" onclick="filtrar(this,'tocamiento')">✋ Tocamiento</div>
+  <div class="filtro-chip" onclick="filtrar(this,'seguimiento')">🫵 Seguimiento</div>
+  <div class="filtro-chip" onclick="filtrar(this,'agresion')">💪 Agresión física</div>
+  <div class="filtro-chip" onclick="filtrar(this,'transporte')">🚌 Transporte</div>
+  <div class="filtro-chip" onclick="filtrar(this,'noche')">🌙 Noche</div>
+  <div style="width:1px;height:20px;background:var(--soft);flex-shrink:0"></div>
+  <div class="filtro-chip" id="btn-emociones" onclick="toggleEmociones(this)">💭 Mapa emocional</div>
+</div>
+
+<div class="mapa-wrap">
+  <div id="mapa"></div>
+
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-txt">Cargando reportes...</div>
+  </div>
+
+  <div class="sin-datos" id="sin-datos">
+    <div style="font-size:32px">📭</div>
+    <p>No hay reportes con este filtro aún.</p>
+  </div>
+
+  <div class="leyenda" id="leyenda-tipo">
+    <div class="leyenda-titulo">Tipo de incidente</div>
+    <div class="leyenda-item"><div class="dot" style="background:#E8614A"></div>Acoso / verbal</div>
+    <div class="leyenda-item"><div class="dot" style="background:#7C5CBF"></div>Tocamiento / físico</div>
+    <div class="leyenda-item"><div class="dot" style="background:#3B7DD8"></div>Seguimiento</div>
+    <div class="leyenda-item"><div class="dot" style="background:#E8A030"></div>Transporte público</div>
+    <div class="leyenda-item"><div class="dot" style="background:#4A8C6F"></div>Otro</div>
+  </div>
+  <div class="leyenda" id="leyenda-emocional" style="display:none">
+    <div class="leyenda-titulo">Emoción reportada</div>
+    <div class="leyenda-item"><div class="dot" style="background:#7C5CBF"></div>Miedo</div>
+    <div class="leyenda-item"><div class="dot" style="background:#E8614A"></div>Enojo</div>
+    <div class="leyenda-item"><div class="dot" style="background:#E8A030"></div>Vergüenza</div>
+    <div class="leyenda-item"><div class="dot" style="background:#3B7DD8"></div>Ansiedad</div>
+    <div class="leyenda-item"><div class="dot" style="background:#5B9BD5"></div>Tristeza</div>
+    <div class="leyenda-item"><div class="dot" style="background:#4A8C6F"></div>Empoderamiento</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSQ1mOCeV59xKhXMWlEEQst4QdO1wD-tkdGwrX5nIT1lXaB1GEBmqbdeJQjZKNMeRdCnxkaMi-tvrBp/pub?gid=0&single=true&output=csv';
+
+var todosReportes = [];
+var marcadores = [];
+var filtroActual = 'todos';
+var mapa;
+
+// =========================================================
+// MAPA INIT
+// =========================================================
+window.addEventListener('load', function() {
+  mapa = L.map('mapa', { zoomControl: true }).setView([25.6866, -100.3161], 12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CartoDB', maxZoom: 19
+  }).addTo(mapa);
+
+  cargarDatos();
+  setInterval(cargarDatos, 30000); // actualizar cada 30s
+});
+
+// =========================================================
+// CARGAR CSV
+// =========================================================
+function cargarDatos() {
+  fetch(CSV_URL + '&t=' + Date.now())
+    .then(function(r) { return r.text(); })
+    .then(function(csv) {
+      todosReportes = parsearCSV(csv);
+      actualizarStats(todosReportes);
+      renderMarcadores(filtroActual);
+      document.getElementById('loading').classList.add('oculto');
+    })
+    .catch(function(err) {
+      console.error('Error cargando datos:', err);
+      document.getElementById('loading').classList.add('oculto');
+    });
+}
+
+// =========================================================
+// PARSEAR CSV
+// =========================================================
+function parsearCSV(csv) {
+  var lineas = csv.split('\n').filter(function(l) { return l.trim(); });
+  if (lineas.length < 2) return [];
+  var headers = lineas[0].split(',').map(function(h) { 
+    return h.trim().replace(/"/g,'').toLowerCase().replace(/^ing$/, 'lng');
+  });
+  var datos = [];
+  for (var i = 1; i < lineas.length; i++) {
+    var cols = splitCSVLinea(lineas[i]);
+    var obj = {};
+    headers.forEach(function(h, idx) { obj[h] = (cols[idx] || '').replace(/^"|"$/g,'').trim(); });
+    // Limpiar comillas y reemplazar coma decimal por punto
+    var latStr = (obj.lat || obj.Lat || '').replace(/"/g,'').replace(',','.').trim();
+    var lngStr = (obj.lng || obj.Lng || obj.Ing || obj.ing || '').replace(/"/g,'').replace(',','.').trim();
+    var lat = parseFloat(latStr);
+    var lng = parseFloat(lngStr);
+    if (!isNaN(lat) && !isNaN(lng) && Math.abs(lat) > 1 && Math.abs(lng) > 1) {
+      obj.lat = lat;
+      obj.lng = lng;
+      datos.push(obj);
+    }
+  }
+  return datos;
+}
+
+function splitCSVLinea(linea) {
+  var result = [], current = '', inQuotes = false;
+  for (var i = 0; i < linea.length; i++) {
+    var c = linea[i];
+    if (c === '"') { inQuotes = !inQuotes; }
+    else if (c === ',' && !inQuotes) { result.push(current); current = ''; }
+    else { current += c; }
+  }
+  result.push(current);
+  return result;
+}
+
+// =========================================================
+// COLOR POR TIPO
+// =========================================================
+function colorPorTipo(tipo) {
+  if (!tipo) return '#4A8C6F';
+  tipo = tipo.toLowerCase();
+  if (tipo.includes('mirada') || tipo.includes('comentar') || tipo.includes('silbido') || tipo.includes('verbal') || tipo.includes('pirop')) return '#E8614A';
+  if (tipo.includes('tocamiento') || tipo.includes('agresión') || tipo.includes('fisic') || tipo.includes('exhib')) return '#7C5CBF';
+  if (tipo.includes('seguimiento') || tipo.includes('persec')) return '#3B7DD8';
+  if (tipo.includes('transporte') || tipo.includes('camión') || tipo.includes('metro') || tipo.includes('taxi')) return '#E8A030';
+  return '#4A8C6F';
+}
+
+function iconoPorTipo(tipo) {
+  if (!tipo) return '📍';
+  tipo = tipo.toLowerCase();
+  if (tipo.includes('mirada') || tipo.includes('acecho')) return '👀';
+  if (tipo.includes('comentar') || tipo.includes('silbido')) return '💬';
+  if (tipo.includes('tocamiento')) return '✋';
+  if (tipo.includes('seguimiento') || tipo.includes('persec')) return '🫵';
+  if (tipo.includes('agresión') || tipo.includes('física')) return '💪';
+  if (tipo.includes('exhib')) return '🚫';
+  if (tipo.includes('fotografía') || tipo.includes('grabac')) return '🤳';
+  return '📍';
+}
+
+// =========================================================
+// CREAR MARCADOR
+// =========================================================
+function crearIcono(tipo, emocion) {
+  var color = modoEmocional ? colorPorEmocion(emocion) : colorPorTipo(tipo);
+  var size = modoEmocional ? 26 : 22;
+  return L.divIcon({
+    html: '<div style="width:' + size + 'px;height:' + size + 'px;background:' + color + ';border-radius:50%;border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);opacity:0.85"></div>',
+    iconSize: [size, size], iconAnchor: [size/2, size/2], className: ''
+  });
+}
+
+// =========================================================
+// RENDER MARCADORES
+// =========================================================
+function renderMarcadores(filtro) {
+  marcadores.forEach(function(m) { mapa.removeLayer(m); });
+  marcadores = [];
+
+  var datos = todosReportes.filter(function(r) {
+    if (filtro === 'todos') return true;
+    var tipo = (r.tipo_incidente || '').toLowerCase();
+    var lugar = (r.lugar || '').toLowerCase();
+    var hora = (r.hora || '').toLowerCase();
+    if (filtro === 'acoso') return tipo.includes('mirada') || tipo.includes('comentar') || tipo.includes('silbido') || tipo.includes('pirop') || tipo.includes('fotografía');
+    if (filtro === 'comentarios') return tipo.includes('comentar') || tipo.includes('silbido') || tipo.includes('pirop');
+    if (filtro === 'tocamiento') return tipo.includes('tocamiento') || tipo.includes('exhib');
+    if (filtro === 'seguimiento') return tipo.includes('seguimiento') || tipo.includes('persec');
+    if (filtro === 'agresion') return tipo.includes('agresión') || tipo.includes('física');
+    if (filtro === 'transporte') return lugar.includes('transporte') || tipo.includes('transporte');
+    if (filtro === 'noche') return hora.includes('noche') || hora.includes('madrugada');
+    return true;
+  });
+
+  var sinDatos = document.getElementById('sin-datos');
+  if (datos.length === 0) { sinDatos.classList.add('visible'); return; }
+  sinDatos.classList.remove('visible');
+
+  datos.forEach(function(r) {
+    var lat = parseFloat(r.lat);
+    var lng = parseFloat(r.lng);
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    var icono = crearIcono(r.tipo_incidente, r.emociones);
+    var marker = L.marker([lat, lng], { icon: icono }).addTo(mapa);
+
+    var tipo = r.tipo_incidente || 'Sin especificar';
+    var emoji = iconoPorTipo(tipo);
+    var fecha = r.timestamp ? r.timestamp.split(' ')[0] : '';
+    var emociones = r.emociones || '';
+    var hora = r.hora || '';
+    var lugar = r.lugar || '';
+    var sensacion = r.sensacion_lugar || '';
+    var impacto = r.impacto_movilidad || '';
+    var intensidad = r.intensidad || '';
+    var genero = r.genero || '';
+    var edad = r.edad || '';
+    var transporte = r.tipo_transporte || '';
+    var ruta = r.ruta || '';
+
+    var popupHTML = '<div class="popup-inner">' +
+      '<div class="popup-tipo">' + emoji + ' ' + tipo + '</div>' +
+      '<div class="popup-meta">' + (fecha ? '📅 ' + fecha : '') + (hora ? ' &middot; ' + hora : '') + '</div>' +
+      (lugar ? '<div style="margin:6px 0 2px"><span class="popup-tag popup-lugar">📍 ' + lugar + '</span>' +
+        (transporte ? '<span class="popup-tag popup-hora">🚌 ' + transporte + (ruta ? ' ' + ruta : '') + '</span>' : '') + '</div>' : '') +
+      (emociones ? '<div style="margin:4px 0 2px"><span class="popup-tag popup-emocion">💭 ' + emociones + '</span></div>' : '') +
+      (sensacion ? '<div style="margin:2px 0"><span class="popup-tag" style="background:#F0EDFB;color:#5C3D9E">🏙️ ' + sensacion + '</span></div>' : '') +
+      (impacto ? '<div style="margin:4px 0 2px;font-size:11px;color:#888">🚶 ' + impacto + '</div>' : '') +
+      (intensidad ? '<div style="margin:4px 0 0;display:flex;align-items:center;gap:4px"><span style="font-size:11px;color:#888">Intensidad:</span>' +
+        '<div style="display:flex;gap:2px">' + [1,2,3,4,5].map(function(n){ return '<div style="width:8px;height:8px;border-radius:50%;background:' + (n <= parseInt(intensidad) ? '#E8614A' : '#EDE8E0') + '"></div>'; }).join('') + '</div></div>' : '') +
+      ((genero || edad) ? '<div style="margin:6px 0 0;padding-top:6px;border-top:1px solid #EDE8E0;font-size:11px;color:#aaa">' + (genero || '') + (edad ? ' &middot; ' + edad : '') + '</div>' : '') +
+      '</div>';
+
+    marker.bindPopup(popupHTML, { maxWidth: 240 });
+    marcadores.push(marker);
+  });
+
+  if (marcadores.length > 0) {
+    var group = L.featureGroup(marcadores);
+    mapa.fitBounds(group.getBounds().pad(0.15));
+  }
+}
+
+// =========================================================
+// ESTADÍSTICAS
+// =========================================================
+function actualizarStats(datos) {
+  document.getElementById('total-reportes').textContent = datos.length;
+
+  var hoy = new Date().toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hoyCount = datos.filter(function(r) {
+    return r.timestamp && r.timestamp.includes(new Date().toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' }).split('/').reverse().join('/'));
+  }).length;
+  document.getElementById('total-hoy').textContent = hoyCount;
+
+  // Tipo más frecuente
+  var tipoConteo = {};
+  datos.forEach(function(r) {
+    if (r.tipo_incidente) {
+      var t = r.tipo_incidente.split(' ').slice(0,2).join(' ');
+      tipoConteo[t] = (tipoConteo[t] || 0) + 1;
+    }
+  });
+  var tipoTop = Object.keys(tipoConteo).sort(function(a,b){ return tipoConteo[b]-tipoConteo[a]; })[0];
+  document.getElementById('tipo-frecuente').textContent = tipoTop ? tipoTop.substring(0,20) + (tipoTop.length>20?'…':'') : '—';
+
+  // Hora más frecuente
+  var horaConteo = {};
+  datos.forEach(function(r) {
+    if (r.hora) horaConteo[r.hora] = (horaConteo[r.hora] || 0) + 1;
+  });
+  var horaTop = Object.keys(horaConteo).sort(function(a,b){ return horaConteo[b]-horaConteo[a]; })[0];
+  document.getElementById('hora-frecuente').textContent = horaTop || '—';
+}
+
+// =========================================================
+// MAPA EMOCIONAL
+// =========================================================
+var modoEmocional = false;
+
+function toggleEmociones(el) {
+  modoEmocional = !modoEmocional;
+  el.classList.toggle('activo', modoEmocional);
+  document.getElementById('leyenda-tipo').style.display = modoEmocional ? 'none' : 'block';
+  document.getElementById('leyenda-emocional').style.display = modoEmocional ? 'block' : 'none';
+  renderMarcadores(filtroActual);
+}
+
+function colorPorEmocion(emocion) {
+  if (!emocion) return '#888888';
+  emocion = emocion.toLowerCase();
+  if (emocion.includes('miedo')) return '#7C5CBF';
+  if (emocion.includes('enojo') || emocion.includes('rabia')) return '#E8614A';
+  if (emocion.includes('vergüenza') || emocion.includes('verguenza')) return '#E8A030';
+  if (emocion.includes('ansiedad') || emocion.includes('angustia')) return '#3B7DD8';
+  if (emocion.includes('tristeza')) return '#5B9BD5';
+  if (emocion.includes('parálisis') || emocion.includes('paralisis')) return '#9E9E9E';
+  if (emocion.includes('empoderamiento') || emocion.includes('empoder')) return '#4A8C6F';
+  return '#888888';
+}
+
+// =========================================================
+// FILTROS
+// =========================================================
+function filtrar(el, tipo) {
+  document.querySelectorAll('.filtro-chip').forEach(function(c) { c.classList.remove('activo'); });
+  el.classList.add('activo');
+  filtroActual = tipo;
+  renderMarcadores(tipo);
+}
+</script>
+</body>
+</html>
